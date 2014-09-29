@@ -2728,6 +2728,7 @@ asmlinkage long sys_cs1550_down(struct cs1550_sem *sem)
     task = current;
 
     struct task_struct tsk = *task;
+
     enqueue(sem, tsk);
 
     dequeue(sem);
