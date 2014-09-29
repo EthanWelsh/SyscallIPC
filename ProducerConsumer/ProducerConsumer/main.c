@@ -1,14 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct Node Node;
 
+
+typedef struct Node Node;
 struct Node
 {
     int task;
     Node *next;
 };
 
+typedef struct cs1550_sem semaphore;
 struct cs1550_sem
 {
     Node *head;
@@ -18,12 +20,13 @@ struct cs1550_sem
 };
 
 
-int enqueue(struct cs1550_sem*, int)
-int dequeue(struct cs1550_sem*);
+int enqueue(semaphore *, int);
+int dequeue(semaphore *);
+
 
 int main(int argc, char* argv[])
 {
-    struct cs1550_sem semy;
+    semaphore semy;
 
     for(int i = 1; i < 10; i++)
     {
@@ -39,7 +42,7 @@ int main(int argc, char* argv[])
 }
 
 
-int enqueue(struct cs1550_sem *s, int task)
+int enqueue(semaphore *s, int task)
 { //and push on things that you put to sleep
 
     if(task == NULL) // If you're trying to add a blank node.
@@ -68,7 +71,7 @@ int enqueue(struct cs1550_sem *s, int task)
 }
 
 
-int dequeue(struct cs1550_sem *s)
+int dequeue(semaphore *s)
 { // you pop off things you wake up
 
     if(s->head == NULL)
