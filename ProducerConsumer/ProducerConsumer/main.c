@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-
 typedef struct Node Node;
 struct Node
 {
@@ -13,10 +11,9 @@ struct Node
 typedef struct cs1550_sem semaphore;
 struct cs1550_sem
 {
+    int value;
     Node *head;
     Node *tail;
-    int value;
-    //Some process queue of your devising
 };
 
 
@@ -26,16 +23,27 @@ int dequeue(semaphore *);
 
 int main(int argc, char* argv[])
 {
-    semaphore semy;
+    semaphore semaphore1;
+    semaphore semaphore2;
 
-    for(int i = 1; i < 10; i++)
+    for(int i = 0; i < 10; i++)
     {
-        enqueue(&semy, i);
+        enqueue(&semaphore1, i);
     }
 
-    for(int i = 1; i < 10; i++)
+    for(int i = 0; i < 10; i++)
     {
-        printf("%d\n", dequeue(&semy));
+        enqueue(&semaphore2, i);
+    }
+
+    for(int i = 0; i < 10; i++)
+    {
+        printf("A%d\n", dequeue(&semaphore1));
+    }
+
+    for(int i = 0; i < 10; i++)
+    {
+        printf("B%d\n", dequeue(&semaphore2));
     }
 
     return 0;
@@ -45,11 +53,11 @@ int main(int argc, char* argv[])
 int enqueue(semaphore *s, int task)
 { //and push on things that you put to sleep
 
-    if(task == NULL) // If you're trying to add a blank node.
+    /*if(task == NULL) // If you're trying to add a blank node.
     {
         printf("Error adding node to queue");
         return -1;
-    }
+    }*/
 
     Node *toAdd = malloc(sizeof(Node));
 
