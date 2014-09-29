@@ -2729,18 +2729,31 @@ asmlinkage long sys_cs1550_down(struct cs1550_sem *sem)
 
     struct task_struct tsk = *task;
 
-    enqueue(sem, tsk);
+    sem->value--;
+    if (sem->value < 0) // add this process to pl
+    {
+        enqueue(sem, tsk);
 
-    dequeue(sem);
+        // SLEEP //
+        set_current_state(TASK_INTERRUPTIBLE);
+        schedule();
+        // SLEEP //
+    }
+
 
     return 1.1;
 }
 
 asmlinkage long sys_cs1550_up(struct cs1550_sem *sem)
 {
+    struct task_struct sleeping_process;
+    value ++;
 
-    printk("You called UP\n");
-    printk("The value of this 'phore is %d", sem->value);
+    if (value <= 0)
+    { // remove a process P from pl
+        sleeping_process = dequeue(sem);
+        wake_up_process(sleeping_process);
+    }
 
     return 1.1;
 }
