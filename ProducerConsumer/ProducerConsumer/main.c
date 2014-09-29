@@ -6,9 +6,8 @@ typedef struct Node Node;
 
 struct Node
 {
-    int *task;
+    int task;
     Node *next;
-
 };
 
 
@@ -32,10 +31,11 @@ int main(int argc, const char * argv[])
     }
 
 
-    dequeue();
 
-
-    printf("DONE");
+    for(int i = 1; i < 10; i++)
+    {
+        printf("%d\n",dequeue());
+    }
 
     return 0;
 }
@@ -45,7 +45,6 @@ int enqueue(int task)
 {
     printf("\n\n");
 
-    if(!head == NULL) printf("~~1~~HEAD:%d\n",*head->task);
 
     if(task == NULL) // If you're trying to add a blank node.
     {
@@ -53,36 +52,22 @@ int enqueue(int task)
         return -1;
     }
 
-    if(!head == NULL) printf("~~2~~HEAD:%d\n",*head->task);
     Node *toAdd = malloc(sizeof(Node));
 
-    if(!head == NULL) printf("~~3~~HEAD:%d\n",*head->task);
-    toAdd->task = &task;
-    if(!head == NULL) printf("~~4~~HEAD:%d\n",*head->task);
+
+    toAdd->task = task;
 
 
     if(head == NULL) // If the head is null, add a new head.
     {
         head = toAdd;
-
-        printf("~~5~~HEAD:%d\n",*head->task);
-
         tail = toAdd;
-        printf("~~6~~HEAD:%d\n",*head->task);
     }
     else
     {
-        printf("~~7~~HEAD:%d\n",*head->task);
         tail->next = toAdd;
-
-
-        printf("~~8~~HEAD:%d\n",*head->task);
         tail = tail->next;
-
-        printf("~~9~~HEAD:%d\n",*head->task);
     }
-
-        printf("~~10~~HEAD:%d\n",*head->task);
     return 0;
 }
 
@@ -101,7 +86,7 @@ int dequeue()
 
     //printf("~~2~~HEAD:%d\n",*head->task);
 
-    int toReturn = *(retNode->task);
+    int toReturn = (retNode->task);
 
     //printf("~~3~~HEAD:%d\n",*head->task);
 
