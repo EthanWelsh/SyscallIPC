@@ -2758,12 +2758,12 @@ asmlinkage long sys_cs1550_up(struct cs1550_sem *sem)
     spin_lock(&my_lock);
 
     struct task_struct sleeping_process;
-    value ++;
+    sem->value++;
 
-    if (value <= 0)
+    if (sem->value <= 0)
     { // remove a process P from pl
         sleeping_process = dequeue(sem);
-        wake_up_process(sleeping_process);
+        wake_up_process(&sleeping_process);
     }
 
     spin_unlock(&my_lock);

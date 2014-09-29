@@ -1,5 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/mman.h>
+
+
+
+typedef struct cs1550_sem semaphore;
+
+struct cs1550_sem
+{
+    int value;
+    void *head;
+    void *tail;
+};
+
+
 
 struct cs1550_sem *empty;
 struct cs1550_sem *full;
@@ -8,6 +22,9 @@ struct cs1550_sem *mutex;
 
 int *buffer;
 int num_of_elements;
+
+
+
 
 int main (int argc, char *argv[])
 {
@@ -26,8 +43,13 @@ int main (int argc, char *argv[])
     empty = mmap(NULL, sizeof(struct cs1550_sem), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
     buffer = mmap(NULL, num_of_elements, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
 
+    printf("CONSUMING\n");
+    consume();
 
+    printf("PRODUCING\n");
+    produce();
 
+    printf("UNDER THE SEA\n");
 }
 
 
