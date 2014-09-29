@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 typedef struct Node Node;
@@ -10,41 +9,38 @@ struct Node
     Node *next;
 };
 
-
-int enqueue(int);
-int dequeue();
-
-Node *head;
-Node *tail;
-
-
-
-
-
-int main(int argc, const char * argv[])
+struct cs1550_sem
 {
-    //void *ptr = mmap(NULL, N, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
+    Node *head;
+    Node *tail;
+    int value;
+    //Some process queue of your devising
+};
+
+
+int enqueue(struct cs1550_sem*, int)
+int dequeue(struct cs1550_sem*);
+
+int main(int argc, char* argv[])
+{
+    struct cs1550_sem semy;
 
     for(int i = 1; i < 10; i++)
     {
-        enqueue(i);
+        enqueue(&semy, i);
     }
 
-
-
     for(int i = 1; i < 10; i++)
     {
-        printf("%d\n",dequeue());
+        printf("%d\n", dequeue(&semy));
     }
 
     return 0;
 }
 
 
-int enqueue(int task)
-{
-    printf("\n\n");
-
+int enqueue(struct cs1550_sem *s, int task)
+{ //and push on things that you put to sleep
 
     if(task == NULL) // If you're trying to add a blank node.
     {
@@ -58,60 +54,44 @@ int enqueue(int task)
     toAdd->task = task;
 
 
-    if(head == NULL) // If the head is null, add a new head.
+    if(s->head == NULL) // If the head is null, add a new head.
     {
-        head = toAdd;
-        tail = toAdd;
+        s->head = toAdd;
+        s->tail = toAdd;
     }
     else
     {
-        tail->next = toAdd;
-        tail = tail->next;
+        s->tail->next = toAdd;
+        s->tail = s->tail->next;
     }
     return 0;
 }
 
 
-int dequeue()
-{
-    if(head == NULL)
+int dequeue(struct cs1550_sem *s)
+{ // you pop off things you wake up
+
+    if(s->head == NULL)
     {
         printf("Tried to dequeue from a empty list");
         return -1;
     }
 
-    //printf("~~1~~HEAD:%d\n",*head->task);
-
-    Node *retNode = head;
-
-    //printf("~~2~~HEAD:%d\n",*head->task);
-
+    Node *retNode = s->head;
     int toReturn = (retNode->task);
-
-    //printf("~~3~~HEAD:%d\n",*head->task);
-
-    if(head->next == NULL)
+    if(s->head->next == NULL)
     {
-       // printf("~~4~~HEAD:%d\n",*head->task);
-        free(head);
-       // printf("~~5~~HEAD:%d\n",*head->task);
-        head = NULL;
-        //printf("~~6~~HEAD:%d\n",*head->task);
+        free(s->head);
+        s->head = NULL;
     }
     else
     {
-        //printf("~~7~~HEAD:%d\n",*head->task);
-        Node *prevHead = head;
-        //printf("~~8~~HEAD:%d\n",*head->task);
-        head = head->next;
-        //printf("~~9~~HEAD:%d\n",*head->task);
+        Node *prevHead = s->head;
+        s->head = s->head->next;
         free(prevHead);
-        //printf("~~10~~HEAD:%d\n",*head->task);
     }
 
-    //printf("~~11~~HEAD:%d\n",*head->task);
     return toReturn;
-
 }
 
 
