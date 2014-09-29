@@ -2660,6 +2660,8 @@ int orderly_poweroff(bool force)
  *                         *
  * * * * * * * * * * * * * */
 
+DEFINE_SPINLOCK(sem_lock);
+
 typedef struct Node Node;
 struct Node
 {
@@ -2721,8 +2723,12 @@ struct task_struct dequeue(semaphore *s)
     return toReturn;
 }
 
+spinlock_t my_lock = SPIN_LOCK_UNLOCKED;
+
 asmlinkage long sys_cs1550_down(struct cs1550_sem *sem)
 {
+    spin_lock(&my_lock);
+
     printk("You called DOWN\n");
     struct task_struct *task;
     task = current;
@@ -2740,12 +2746,17 @@ asmlinkage long sys_cs1550_down(struct cs1550_sem *sem)
         // SLEEP //
     }
 
+    spin_unlock(&my_lock);
+
 
     return 1.1;
 }
 
 asmlinkage long sys_cs1550_up(struct cs1550_sem *sem)
 {
+
+    spin_lock(&my_lock);
+
     struct task_struct sleeping_process;
     value ++;
 
@@ -2754,6 +2765,8 @@ asmlinkage long sys_cs1550_up(struct cs1550_sem *sem)
         sleeping_process = dequeue(sem);
         wake_up_process(sleeping_process);
     }
+
+    spin_unlock(&my_lock);
 
     return 1.1;
 }
