@@ -16,27 +16,18 @@ struct cs1550_sem
     Node *tail;
 };
 
-
 int enqueue(semaphore *, struct task_struct);
-int dequeue(semaphore *);
 
-
-int main(int argc, char* argv[])
-{
-    semaphore semaphore1;
-
-    return 0;
-}
-
+struct task_struct dequeue(semaphore *);
 
 int enqueue(semaphore *s, struct task_struct task)
 { //and push on things that you put to sleep
 
-    /*if(task == NULL) // If you're trying to add a blank node.
+    if (task == NULL) // If you're trying to add a blank node.
     {
         printf("Error adding node to queue");
         return -1;
-    }*/
+    }
 
     Node *toAdd = malloc(sizeof(Node));
 
@@ -44,7 +35,7 @@ int enqueue(semaphore *s, struct task_struct task)
     toAdd->task = task;
 
 
-    if(s->head == NULL) // If the head is null, add a new head.
+    if (s->head == NULL) // If the head is null, add a new head.
     {
         s->head = toAdd;
         s->tail = toAdd;
@@ -61,14 +52,14 @@ int enqueue(semaphore *s, struct task_struct task)
 struct task_struct dequeue(semaphore *s)
 { // you pop off things you wake up
 
-    if(s->head == NULL)
+    if (s->head == NULL)
     {
         return NULL;
     }
 
     Node *retNode = s->head;
     struct task_struct toReturn = (retNode->task);
-    if(s->head->next == NULL)
+    if (s->head->next == NULL)
     {
         free(s->head);
         s->head = NULL;
