@@ -21,9 +21,9 @@ int main (int argc, char *argv[])
     int num_of_cons = argv[2];
     int num_of_elements = argv[3];
 
-    empty = malloc(sizeof(struct cs1550_sem));
-    full = malloc(sizeof(struct cs1550_sem));
-    mutex = malloc(sizeof(struct cs1550_sem));
+    mutex = mmap(NULL, sizeof(struct cs1550_sem), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
+    full = mmap(NULL, sizeof(struct cs1550_sem), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
+    empty = mmap(NULL, sizeof(struct cs1550_sem), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
     buffer = mmap(NULL, num_of_elements, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
 
 
