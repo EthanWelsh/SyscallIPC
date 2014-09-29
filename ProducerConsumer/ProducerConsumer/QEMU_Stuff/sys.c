@@ -2724,29 +2724,13 @@ struct task_struct dequeue(semaphore *s)
 asmlinkage long sys_cs1550_down(struct cs1550_sem *sem)
 {
     printk("You called DOWN\n");
-    struct task_struct *task = current;
+    struct task_struct *task;
+    task = current;
 
-    printk("This PID: %d\n", task->pid);
+    struct task_struct tsk = *task;
+    enqueue(sem, tsk);
 
-    semaphore semaphore1;
-
-    enqueue(&semaphore1, *task);
-
-    printk("STAYING ALIVE\n");
-
-    //dequeue(&semaphore1);
-
-    printk("STAYING ALIVE\n");
-
-
-
-
-    //
-
-
-    //enqueue(&semaphore1, task);
-
-    //dequeue(&semaphore1);
+    dequeue(sem);
 
     return 1.1;
 }

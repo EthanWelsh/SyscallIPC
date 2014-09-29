@@ -1,5 +1,11 @@
+#include <stdlib.h>
+
 int main()
 {
-    syscall(__NR_sys_cs1550_down);
+    struct cs1550_sem *sem;
+
+    sem = malloc(sizeof(sem));
+
+    syscall(326, sem);
     return 0;
 }
