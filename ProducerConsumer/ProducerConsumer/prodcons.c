@@ -87,8 +87,7 @@ int produce()
 
         buffer[in] = pitem;
 
-        if(num_of_elements != 0) in = (in + 1) % num_of_elements;
-        else printf("ERROR\n");
+        in = (in + 1) % num_of_elements;
 
         printf("PRODUCING %d at position %d\n", pitem, in);
         up(mutex);
@@ -110,9 +109,7 @@ int consume()
         down(mutex);
 
         citem = buffer[out];
-        if(num_of_elements != 0) out = (out+1) % num_of_elements;
-        else printf("ERROR\n");
-
+        out = (out+1) % num_of_elements;
 
         printf("CONSUMING %d at position %d\n", citem, out);
         up(mutex);
