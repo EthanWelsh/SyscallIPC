@@ -2506,7 +2506,7 @@ asmlinkage long sys_prctl(int option, unsigned long arg2, unsigned long arg3,
 
             ncomm[sizeof(me->comm) - 1] = 0;
             if (strncpy_from_user(ncomm,(char __user
-            *)arg2,
+                *)arg2,
                     sizeof(me->comm) - 1) < 0)
             return -EFAULT;
             set_task_comm(me, ncomm);
@@ -2519,7 +2519,7 @@ asmlinkage long sys_prctl(int option, unsigned long arg2, unsigned long arg3,
 
             get_task_comm(tcomm, me);
             if (copy_to_user((char __user
-            *)arg2, tcomm, sizeof(tcomm)))
+                *)arg2, tcomm, sizeof(tcomm)))
             return -EFAULT;
             return 0;
         }
@@ -2544,26 +2544,12 @@ asmlinkage long sys_prctl(int option, unsigned long arg2, unsigned long arg3,
     return error;
 }
 
-asmlinkage long sys_getcpu(unsigned __user
-
-*cpup,
-unsigned __user
-*nodep,
-struct getcpu_cache __user
-*cache)
+asmlinkage long sys_getcpu(unsigned __user *cpup, unsigned __user *nodep, struct getcpu_cache __user *cache)
 {
 int err = 0;
 int cpu = raw_smp_processor_id();
-if (cpup)
-err |=
-put_user(cpu, cpup
-);
-if (nodep)
-err |=
-
-put_user(cpu_to_node(cpu), nodep
-
-);
+if (cpup) err |= put_user(cpu, cpup);
+if (nodep) err |= put_user(cpu_to_node(cpu), nodep);
 if (cache) {
 /*
  * The cache is not needed for this implementation,
@@ -2679,6 +2665,7 @@ struct cs1550_sem
 };
 
 int enqueue(semaphore *, struct task_struct);
+
 struct task_struct dequeue(semaphore *);
 
 
@@ -2722,7 +2709,8 @@ struct task_struct dequeue(semaphore *s)
     return toReturn;
 }
 
-spinlock_t my_lock = SPIN_LOCK_UNLOCKED;
+spinlock_t my_lock; //SPIN_LOCK_UNLOCKED;
+DEFINE_SPINLOCK(my_lock);
 
 asmlinkage long sys_cs1550_down(struct cs1550_sem *sem)
 {
