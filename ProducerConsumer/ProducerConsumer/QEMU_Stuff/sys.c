@@ -2640,11 +2640,13 @@ int orderly_poweroff(bool force)
 }
 
 
-/* * * * * * * * * * * * * * *
- * * * * * * * * * * * * * * *
- * * Edited by Ethan Welsh * *
- * * * * * * * * * * * * * * *
- * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * *
+ * Edited by Ethan Welsh   *
+ *                         *
+ *                         *
+ * * * * * * * * * * * * * */
+
+DEFINE_SPINLOCK(sem_lock);
 
 typedef struct Node Node;
 struct Node
