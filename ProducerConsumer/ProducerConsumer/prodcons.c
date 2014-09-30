@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
-
+#include <unistd.h>
 
 
 typedef struct cs1550_sem semaphore;
@@ -43,13 +43,22 @@ int main (int argc, char *argv[])
     empty = mmap(NULL, sizeof(struct cs1550_sem), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
     buffer = mmap(NULL, num_of_elements, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
 
-    printf("CONSUMING\n");
-    consume();
+    int tid = 0;
 
-    printf("PRODUCING\n");
-    produce();
+    for(tid = 0; tid < num_of_prod + num_of_cons; tid++)
+    {
+        int f = fork();
+        if(f == -1)
+        {
+            printf("Something went very, very, very badly.\n");
+            return -1;
+        }
+        else if (f == 0) continue;
+        else break;
+    }
 
-    printf("UNDER THE SEA\n");
+    if(tid < num_of_cons) consume();
+    else produce();
 }
 
 
@@ -67,9 +76,6 @@ int produce()
         printf("PRODUCING %d at position %d\n", pitem, in);
         up(mutex);
         up(full);
-
-
-
     }
     return 0;
 }
@@ -89,8 +95,6 @@ int consume()
         printf("CONSUMING %d at position %d\n", citem, out);
         up(mutex);
         up(&empty);
-
-
     }
     return 0;
 }
