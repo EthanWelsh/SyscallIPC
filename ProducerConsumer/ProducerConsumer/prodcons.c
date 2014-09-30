@@ -38,7 +38,7 @@ int main (int argc, char *argv[])
 
     int num_of_prod = atoi(argv[1]);
     int num_of_cons = atoi(argv[2]);
-    int num_of_elements = atoi(argv[3]);
+    num_of_elements = atoi(argv[3]);
 
     //printf("Creating %d producers and %d consumers. There are %d elements in the array.\n", num_of_prod, num_of_cons,num_of_elements);
 
@@ -54,11 +54,11 @@ int main (int argc, char *argv[])
 
 
     int tid = 0;
+    int f = 0;
 
-
-    for(tid = 0; tid < num_of_prod + num_of_cons; tid++)
+    for(tid = 1; tid < (num_of_prod + num_of_cons); tid++)
     {
-        int f = fork();
+        f = fork();
         if(f == -1)
         {
             printf("Something went very, very, very badly.\n");
@@ -68,14 +68,14 @@ int main (int argc, char *argv[])
         else break;
     }
 
-    if(tid < num_of_prod)
+    if((tid < num_of_prod) && (f != 0))
     {
-        printf("Producer Created: %d\n", tid);
+        //printf("Producer Created: %d\n", tid);
         produce();
     }
     else
     {
-        printf("Consumer Created: %d\n", tid);
+        //printf("Consumer Created: %d\n", tid);
         consume();
     }
     return 0;
@@ -91,8 +91,12 @@ int produce()
     {
         down(empty);
         down(mutex);
+
         buffer[in] = pitem;
-        in = (in + 1) % num_of_elements;
+
+        if(num_of_elements != 0) in = (in + 1) % num_of_elements;
+        else printf("ERROR\n");
+
         printf("PRODUCING %d at position %d\n", pitem, in);
         up(mutex);
         up(full);
@@ -109,9 +113,14 @@ int consume()
     while (1)
     {
         down(full);
+
         down(mutex);
+
         citem = buffer[out];
-        out = (out+1) % num_of_elements;
+        if(num_of_elements != 0) out = (out+1) % num_of_elements;
+        else printf("ERROR\n");
+
+
         printf("CONSUMING %d at position %d\n", citem, out);
         up(mutex);
         up(empty);

@@ -2734,7 +2734,7 @@ asmlinkage long sys_cs1550_down(struct cs1550_sem *sem)
     spin_unlock(&my_lock);
 
 
-    return 1.1;
+    return 0;
 }
 
 asmlinkage long sys_cs1550_up(struct cs1550_sem *sem)
@@ -2753,7 +2753,7 @@ asmlinkage long sys_cs1550_up(struct cs1550_sem *sem)
 
     spin_unlock(&my_lock);
 
-    return 1.1;
+    return 0;
 }
 
 asmlinkage long helloWorld()
