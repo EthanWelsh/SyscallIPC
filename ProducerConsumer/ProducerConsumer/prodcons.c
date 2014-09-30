@@ -65,9 +65,18 @@ int main (int argc, char *argv[])
         else break; // otherwise, we're a child so let's become a producer or consumer...
     }
 
-    if(f == 0) return 0; // stop execution of the parent because it has already created all producers and consumers.
+    if(f == 0)
+    {
+        printf("KKK\n");
+        while(1)
+        {
+
+        }
+    } // stop execution of the parent because it has already created all producers and consumers.
     if(i < num_of_prod) produce(); // create producers
     else consume(); // create consumers
+
+
     return 0;
 }
 
@@ -86,7 +95,7 @@ int produce()
 
         in = (in + 1) % num_of_elements; // circular increment
 
-        printf("PRODUCING %d at position %d\n", pitem, in);
+        printf("PRODUCIN %d at position %d\n", pitem, in);
 
         up(mutex); // leave critical region
         up(full);  // we've not got one more full cell in our array now that we've produced one.
@@ -109,7 +118,7 @@ int consume()
 
         out = (out+1) % num_of_elements; // circular increment
 
-        printf("CONSUMING %d at position %d\n", citem, out);
+        printf("CONSUMIN %d at position %d\n", citem, out);
 
         up(mutex); // leave critical region
         up(empty); // we've got one more empty cell in our array now that we've consumer one.
