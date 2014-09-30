@@ -34,9 +34,17 @@ int main (int argc, char *argv[])
         return -1;
     }
 
-    int num_of_prod = argv[1];
-    int num_of_cons = argv[2];
-    int num_of_elements = argv[3];
+    int num_of_prod = atoi(argv[1]);
+    int num_of_cons = atoi(argv[2]);
+    int num_of_elements = atoi(argv[3]);
+
+    empty->value = num_of_elements;
+    mutex->value = 1;
+    full->value = 0;
+
+
+    printf("Creating %d producers and %d consumers. There are %d elements in the array.\n", num_of_prod, num_of_cons,num_of_elements);
+
 
     mutex = mmap(NULL, sizeof(struct cs1550_sem), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
     full = mmap(NULL, sizeof(struct cs1550_sem), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
@@ -44,6 +52,7 @@ int main (int argc, char *argv[])
     buffer = mmap(NULL, num_of_elements, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
 
     int tid = 0;
+
 
     for(tid = 0; tid < num_of_prod + num_of_cons; tid++)
     {
@@ -57,8 +66,17 @@ int main (int argc, char *argv[])
         else break;
     }
 
-    if(tid < num_of_cons) consume();
-    else produce();
+    if(tid < num_of_prod)
+    {
+        printf("Producer Created: %d\n", tid);
+        produce();
+    }
+    else
+    {
+        printf("Consumer Created: %d\n", tid);
+        consume();
+    }
+    return 0;
 }
 
 
@@ -88,13 +106,13 @@ int consume()
 
     while (1)
     {
-        down(&full);
+        down(full);
         down(mutex);
         citem = buffer[out];
         out = (out+1) % num_of_elements;
         printf("CONSUMING %d at position %d\n", citem, out);
         up(mutex);
-        up(&empty);
+        up(empty);
     }
     return 0;
 }
