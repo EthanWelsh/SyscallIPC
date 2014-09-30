@@ -64,7 +64,7 @@ int produce()
         down(mutex);
         buffer[in] = pitem;
         in = (in+1) % num_of_elements;
-        printk("PRODUCING %d at position %d\n", pitem, in);
+        printf("PRODUCING %d at position %d\n", pitem, in);
         up(mutex);
         up(full);
 
@@ -86,7 +86,7 @@ int consume()
         down(mutex);
         citem = buffer[out];
         out = (out+1) % num_of_elements;
-        printk("CONSUMING %d at position %d\n", citem, out);
+        printf("CONSUMING %d at position %d\n", citem, out);
         up(mutex);
         up(&empty);
 
@@ -97,10 +97,10 @@ int consume()
 
 void down(struct cs1550_sem *sem)
 {
-    syscall(__NR_cs1550_down, sem);
+    syscall(326, sem);
 }
 
 int up(struct cs1550_sem *sem)
 {
-    syscall(__NR_cs1550_up, sem);
+    syscall(327, sem);
 }
