@@ -2679,7 +2679,6 @@ struct cs1550_sem
 };
 
 int enqueue(semaphore *, struct task_struct);
-
 struct task_struct dequeue(semaphore *);
 
 
@@ -2728,8 +2727,6 @@ spinlock_t my_lock = SPIN_LOCK_UNLOCKED;
 asmlinkage long sys_cs1550_down(struct cs1550_sem *sem)
 {
     spin_lock(&my_lock);
-
-    printk("You called DOWN\n");
     struct task_struct *task;
     task = current;
 

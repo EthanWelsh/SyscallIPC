@@ -23,6 +23,8 @@ struct cs1550_sem *mutex;
 int *buffer;
 int num_of_elements;
 
+void down(struct cs1550_sem *);
+void up(struct cs1550_sem *);
 
 
 
@@ -122,7 +124,7 @@ void down(struct cs1550_sem *sem)
     syscall(326, sem);
 }
 
-int up(struct cs1550_sem *sem)
+void up(struct cs1550_sem *sem)
 {
     syscall(327, sem);
 }
