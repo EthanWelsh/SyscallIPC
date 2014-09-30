@@ -56,7 +56,7 @@ int main (int argc, char *argv[])
     int tid = 0;
     int f = 0;
 
-    for(tid = 1; tid < (num_of_prod + num_of_cons); tid++)
+    for(tid = 0; tid < (num_of_prod + num_of_cons); tid++)
     {
         f = fork();
         if(f == -1)
@@ -68,16 +68,9 @@ int main (int argc, char *argv[])
         else break;
     }
 
-    if((tid < num_of_prod) && (f != 0))
-    {
-        //printf("Producer Created: %d\n", tid);
-        produce();
-    }
-    else
-    {
-        //printf("Consumer Created: %d\n", tid);
-        consume();
-    }
+    if((tid < num_of_prod) && (f != 0)) produce();
+    else consume();
+
     return 0;
 }
 
