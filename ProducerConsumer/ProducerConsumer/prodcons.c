@@ -9,13 +9,19 @@ struct cs1550_sem
     int value;
     void *head;
     void *tail;
+    int id;
 };
 
+/*typedef struct Node Node;
+struct Node
+{
+    struct task_struct task;
+    Node *next;
+};*/
 
 // PROTOTYPES
 void down(struct cs1550_sem *);
 void up(struct cs1550_sem *);
-void init_semaphore(struct cs1550_sem *, int);
 
 //globals
 struct cs1550_sem *empty;
@@ -45,12 +51,14 @@ int main (int argc, char *argv[])
     empty = mmap(NULL, sizeof(struct cs1550_sem), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0); // empty semaphore
     buffer = mmap(NULL, num_of_elements, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0); // shared array to be subject to race condition
 
-    //empty->value = num_of_elements; // Start with N number of empty cells in the array
-    //mutex->value = 1; // Set the mutex at one in order to establish atomicity of instructions
-    //full->value = 0; // Start with 0 full cells in the array
-    init_semaphore(empty, num_of_elements);
-    init_semaphore(full, 0);
-    init_semaphore(mutex, 1);
+    // Initialize the semaphores to the correct value
+    empty->value = num_of_elements; // Start with N number of empty cells in the array
+    mutex->value = 1; // Set the mutex at one in order to establish atomicity of instructions
+    full->value = 0; // Start with 0 full cells in the array
+
+    empty->id = 0;
+    mutex->id = 1;
+    full->id = 2;
 
     int i = 0;
     int f = 0;
@@ -89,7 +97,7 @@ int produce()
 
         in = (in + 1) % num_of_elements; // circular increment
 
-        printf("PRODUCING %d. (%d, %d)\n", in, empty->value, full->value);
+        printf("                                PRODUCING %d. (%d, %d)\n", in, empty->value, full->value);
 
         up(mutex); // leave critical region
         up(full);  // we've not got one more full cell in our array now that we've produced one.
@@ -112,7 +120,7 @@ int consume()
 
         out = (out+1) % num_of_elements; // circular increment
 
-        printf("CONSUMING %d. (%d, %d)\n", out, empty->value, full->value);
+        printf("                                CONSUMING %d. (%d, %d)\n", out, empty->value, full->value);
 
         up(mutex); // leave critical region
         up(empty); // we've got one more empty cell in our array now that we've consumer one.
@@ -130,11 +138,5 @@ void down(struct cs1550_sem *sem)
 void up(struct cs1550_sem *sem)
 {
     syscall(__NR_sys_cs1550_up, sem);
-    return;
-}
-
-void init_semaphore(struct cs1550_sem *sem, int v)
-{
-    syscall(__NR_sys_init_semaphore, sem, v);
     return;
 }

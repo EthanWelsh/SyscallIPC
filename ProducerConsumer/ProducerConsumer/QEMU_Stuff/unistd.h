@@ -333,8 +333,6 @@
 #define __NR_helloWorld         325
 #define __NR_sys_cs1550_down    326
 #define __NR_sys_cs1550_up      327
-#define __NR_sys_init_semaphore 328
-
 
 #ifdef __KERNEL__
 

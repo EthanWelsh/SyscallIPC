@@ -327,4 +327,3 @@ ENTRY(sys_call_table)
 	.long helloWorld		/* 325 */
 	.long sys_cs1550_down
 	.long sys_cs1550_up
-	.long sys_init_semaphore

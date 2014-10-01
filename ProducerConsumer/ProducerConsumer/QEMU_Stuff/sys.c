@@ -2662,6 +2662,7 @@ struct cs1550_sem
     int value;
     Node *head;
     Node *tail;
+    int id;
 };
 
 int enqueue(semaphore *, struct task_struct);
@@ -2707,11 +2708,6 @@ struct task_struct dequeue(semaphore *s)
     return toReturn;
 }
 
-asmlinkage long sys_init_semaphore(struct cs1550_sem *sem, int v)
-{
-    sem->value = v;
-}
-
 
 DEFINE_SPINLOCK(my_lock);
 
@@ -2719,7 +2715,10 @@ asmlinkage long sys_cs1550_down(struct cs1550_sem *sem)
 {
     spin_lock(&my_lock);
 
-    printk("Decrementing SEM value to %d\n", (sem->value - 1));
+    if(sem->id == 0) printk("DOWN        EMPTY %d\n", sem->value);
+    if(sem->id == 1) printk("DOWN        MUTEX %d\n", sem->value);
+    if(sem->id == 2) printk("DOWN        FULL %d\n", sem->value);
+
     sem->value--;
 
     if (sem->value < 0) // add this process to pl
@@ -2744,11 +2743,16 @@ asmlinkage long sys_cs1550_up(struct cs1550_sem *sem)
     spin_lock(&my_lock);
 
     struct task_struct sleeping_process;
+
+    if(sem->id == 0) printk("UP          EMPTY %d\n", sem->value);
+    if(sem->id == 1) printk("UP          MUTEX %d\n", sem->value);
+    if(sem->id == 2) printk("UP          FULL %d\n", sem->value);
     sem->value++;
 
     if (sem->value <= 0)
     {
         sleeping_process = dequeue(sem);
+        printk("WAKE\t\t\t\t%d\n",sleeping_process.pid);
         wake_up_process(&sleeping_process);
     }
 
