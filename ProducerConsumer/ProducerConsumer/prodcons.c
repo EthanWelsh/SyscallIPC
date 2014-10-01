@@ -3,21 +3,24 @@
 #include <sys/mman.h>
 #include <linux/unistd.h>
 
+
+typedef struct Node Node;
+struct Node
+{
+    void *task;
+    void *next;
+};
+
 typedef struct cs1550_sem semaphore;
 struct cs1550_sem
 {
     int value;
-    void *head;
-    void *tail;
+    Node *head;
+    Node *tail;
     int id;
 };
 
-/*typedef struct Node Node;
-struct Node
-{
-    struct task_struct task;
-    Node *next;
-};*/
+
 
 // PROTOTYPES
 void down(struct cs1550_sem *);
