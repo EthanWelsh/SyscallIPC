@@ -2646,7 +2646,7 @@ int orderly_poweroff(bool force)
  *                         *
  * * * * * * * * * * * * * */
 
-DEFINE_SPINLOCK(sem_lock);
+
 
 typedef struct Node Node;
 struct Node
@@ -2665,9 +2665,7 @@ struct cs1550_sem
 };
 
 int enqueue(semaphore *, struct task_struct);
-
 struct task_struct dequeue(semaphore *);
-
 
 int enqueue(semaphore *s, struct task_struct task)
 { //and push on things that you put to sleep
@@ -2709,21 +2707,24 @@ struct task_struct dequeue(semaphore *s)
     return toReturn;
 }
 
-spinlock_t my_lock; //SPIN_LOCK_UNLOCKED;
+asmlinkage long sys_init_semaphore(struct cs1550_sem *sem, int v)
+{
+    sem->value = v;
+}
+
+
 DEFINE_SPINLOCK(my_lock);
 
 asmlinkage long sys_cs1550_down(struct cs1550_sem *sem)
 {
     spin_lock(&my_lock);
-    struct task_struct *task;
-    task = current;
 
-    struct task_struct tsk = *task;
-
+    printk("Decrementing SEM value to %d\n", (sem->value - 1));
     sem->value--;
+
     if (sem->value < 0) // add this process to pl
     {
-        enqueue(sem, tsk);
+        enqueue(sem, *current);
 
         // SLEEP //
         set_current_state(TASK_INTERRUPTIBLE);
@@ -2746,7 +2747,7 @@ asmlinkage long sys_cs1550_up(struct cs1550_sem *sem)
     sem->value++;
 
     if (sem->value <= 0)
-    { // remove a process P from pl
+    {
         sleeping_process = dequeue(sem);
         wake_up_process(&sleeping_process);
     }
