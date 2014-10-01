@@ -2718,16 +2718,15 @@ asmlinkage long sys_cs1550_down(struct cs1550_sem *sem)
 {
     spin_lock(&my_lock);
 
-    if(sem->id == 0) printk("DOWN        EMPTY %d\n", sem->value);
+    /*if(sem->id == 0) printk("DOWN        EMPTY %d\n", sem->value);
     if(sem->id == 1) printk("DOWN        MUTEX %d\n", sem->value);
-    if(sem->id == 2) printk("DOWN        FULL %d\n", sem->value);
+    if(sem->id == 2) printk("DOWN        FULL %d\n", sem->value);*/
 
     sem->value--;
 
     if (sem->value < 0) // add this process to pl
     {
         enqueue(sem, current);
-
         // SLEEP //
         set_current_state(TASK_INTERRUPTIBLE);
         // SLEEP //
@@ -2735,8 +2734,10 @@ asmlinkage long sys_cs1550_down(struct cs1550_sem *sem)
 
     spin_unlock(&my_lock);
 
+    if(sem->value < 0) schedule();
 
-    schedule();
+
+
 
 
     return 0;
@@ -2748,27 +2749,24 @@ asmlinkage long sys_cs1550_up(struct cs1550_sem *sem)
 
     spin_lock(&my_lock);
 
-    if(sem->id == 0) printk("UP          EMPTY %d\n", sem->value);
+
+    if(sem == NULL)
+    {
+        printk("Ruh-roh\n");
+        while(1);
+    }
+
+    /*if(sem->id == 0) printk("UP          EMPTY %d\n", sem->value);
     if(sem->id == 1) printk("UP          MUTEX %d\n", sem->value);
-    if(sem->id == 2) printk("UP          FULL %d\n", sem->value);
+    if(sem->id == 2) printk("UP          FULL %d\n", sem->value);*/
+
+
 
     sem->value++;
 
     if (sem->value <= 0)
     {
         struct task_struct *sleeping_process = dequeue(sem);
-
-        if(sleeping_process == -1)
-        {
-            printk("PROCESS -1\n");
-            while(1);
-        }
-        else if (sleeping_process == NULL)
-        {
-            printk("PROCESS NULL\n");
-            while(1);
-        }
-
         wake_up_process(sleeping_process);
     }
 
