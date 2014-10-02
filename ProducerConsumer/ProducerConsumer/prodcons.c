@@ -100,7 +100,7 @@ int produce()
 
         in = (in + 1) % num_of_elements; // circular increment
 
-        printf("                                PRODUCING %d. (%d, %d)\n", in, empty->value, full->value);
+        printf("                                PRODUCING %d. (E%d, F%d)\n", in, empty->value, full->value);
 
         up(mutex); // leave critical region
         up(full);  // we've not got one more full cell in our array now that we've produced one.
@@ -123,7 +123,7 @@ int consume()
 
         out = (out+1) % num_of_elements; // circular increment
 
-        printf("                                CONSUMING %d. (%d, %d)\n", out, empty->value, full->value);
+        printf("                                CONSUMING %d. (E%d, F%d)\n", out, empty->value, full->value);
 
         up(mutex); // leave critical region
         up(empty); // we've got one more empty cell in our array now that we've consumer one.
