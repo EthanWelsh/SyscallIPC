@@ -2722,26 +2722,30 @@ asmlinkage long sys_cs1550_down(struct cs1550_sem *sem)
 
     sem->value = sem->value - 1;
 
-    if (sem->value < 0) // add this process to pl
+    // If this resource isn't available, add yourself to the queue and go to sleep until someone else wakes you up.
+    if (sem->value < 0)
     {
         enqueue(sem);
+
         set_current_state(TASK_INTERRUPTIBLE);
+
         spin_unlock(&my_lock);
+
         schedule();
     }
     spin_unlock(&my_lock);
+
     return 0;
 }
-
 
 // Relinquish your resource and wake up someone who was waiting for it.
 asmlinkage long sys_cs1550_up(struct cs1550_sem *sem)
 {
-
     spin_lock(&my_lock);
 
-    sem->value = sem->value + 1;
+    sem->value = sem->value + 1; // increment semaphore value
 
+    // If the value of this semaphore is 0 or less, someone is waiting on us, so let's wake them up.
     if (sem->value <= 0)
     {
         struct task_struct *sleeping_process = dequeue(sem);

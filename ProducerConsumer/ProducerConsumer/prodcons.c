@@ -38,6 +38,11 @@ int *out;
 
 int *pitem;
 
+int i;
+
+int num_of_prod;
+int num_of_cons;
+
 int main (int argc, char *argv[])
 {
     // Check for correct format.
@@ -48,8 +53,8 @@ int main (int argc, char *argv[])
     }
 
     // Get command line arguments
-    int num_of_prod = atoi(argv[1]);
-    int num_of_cons = atoi(argv[2]);
+    num_of_prod = atoi(argv[1]);
+    num_of_cons = atoi(argv[2]);
     num_of_elements = atoi(argv[3]);
 
     // Set up shared memory for the following...
@@ -67,8 +72,9 @@ int main (int argc, char *argv[])
     mutex->value = 1; // Set the mutex at one in order to establish atomicity of instructions
     full->value = 0; // Start with 0 full cells in the array
 
-    int i = 0;
+
     int f = 0;
+    i = 0;
 
     // Loop around N number of times, where N is the number of producers you want to create plus the number of consumers.
     for(i = 0; i < (num_of_prod + num_of_cons); i++)
@@ -102,7 +108,11 @@ int produce()
 
         buffer[*in] = *pitem;
 
-        fprintf(stderr, "PRODUCING %d. (E%d, F%d)\n", *pitem, empty->value, full->value);
+        //Producer A Produced: 0
+
+        fprintf(stderr, "Producer %c Produced: %d\n", ('A' + i), *pitem);
+
+        //fprintf(stderr, "PRODUCING %d. (E%d, F%d)\n", *pitem, empty->value, full->value);
 
         *in = (*in + 1) % num_of_elements; // circular increment
 
@@ -126,7 +136,9 @@ int consume()
 
         citem = buffer[*out];
 
-        fprintf(stderr, "CONSUMING %d. (E%d, F%d)\n", citem, empty->value, full->value);
+        fprintf(stderr, "Consumer %c Consumed: %d\n", ('A' + (i - num_of_prod)), citem);
+
+        //fprintf(stderr, "CONSUMING %d. (E%d, F%d)\n", citem, empty->value, full->value);
 
         *out = (*out+1) % num_of_elements; // circular increment
 
