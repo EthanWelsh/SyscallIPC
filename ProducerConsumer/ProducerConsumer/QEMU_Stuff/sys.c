@@ -2662,7 +2662,6 @@ struct cs1550_sem
     int value;
     Node *head;
     Node *tail;
-    int id;
 };
 
 int enqueue(semaphore *);
@@ -2696,14 +2695,7 @@ int enqueue(semaphore *s)
 struct task_struct *dequeue(semaphore *s)
 { // you pop off things you wake up
 
-    if((s->head == NULL) || (s->tail == NULL))
-    {
-        printk("ERORROROROROR!\n");
-        while(1);
-        return -1;
-    }
-    else
-    {
+
         struct task_struct *tsk = s->head->task;
         if(s->head->next == NULL)
         {
@@ -2719,25 +2711,6 @@ struct task_struct *dequeue(semaphore *s)
             kfree(oldhead);
             return tsk;
         }
-    }
-
-
-
-
-    /*if(s->head->next == NULL)
-    {
-        kfree(s->head);
-        s->head=NULL;
-        s->tail=NULL;
-    }
-    else
-    {
-        Node *previousHead = s->head;
-        s->head = s->head->next;
-        kfree(previousHead);
-    }
-
-    return returnValue;*/
 }
 
 
@@ -2748,21 +2721,19 @@ asmlinkage long sys_cs1550_down(struct cs1550_sem *sem)
 {
     spin_lock(&my_lock);
 
-    if(sem->id == 0) printk("DOWN        EMPTY %d\n", sem->value);
-    if(sem->id == 1) printk("DOWN        MUTEX %d\n", sem->value);
-    if(sem->id == 2) printk("DOWN        FULL %d\n", sem->value);
-
-    sem->value--;
+    sem->value = sem->value - 1;
 
     if (sem->value < 0) // add this process to pl
     {
         enqueue(sem);
         set_current_state(TASK_INTERRUPTIBLE);
+        spin_unlock(&my_lock);
+        schedule();
     }
+
 
     spin_unlock(&my_lock);
 
-    if(sem->value < 0) schedule();
 
     return 0;
 }
@@ -2773,11 +2744,7 @@ asmlinkage long sys_cs1550_up(struct cs1550_sem *sem)
 
     spin_lock(&my_lock);
 
-    if(sem->id == 0) printk("UP          EMPTY %d\n", sem->value);
-    if(sem->id == 1) printk("UP          MUTEX %d\n", sem->value);
-    if(sem->id == 2) printk("UP          FULL %d\n", sem->value);
-
-    sem->value++;
+    sem->value = sem->value + 1;
 
     if (sem->value <= 0)
     {

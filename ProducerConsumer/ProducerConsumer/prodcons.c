@@ -17,7 +17,6 @@ struct cs1550_sem
     int value;
     Node *head;
     Node *tail;
-    int id;
 };
 
 
@@ -34,9 +33,17 @@ struct cs1550_sem *mutex;
 int *buffer;
 int num_of_elements;
 
+int *in;
+int *out;
+
+int *pitem;
 
 int main (int argc, char *argv[])
 {
+
+
+
+
     if(argc != 4)
     { // Check for correct format.
         printf("Valid format is: prodcons 2 2 1000\n");
@@ -52,19 +59,24 @@ int main (int argc, char *argv[])
     mutex = mmap(NULL, sizeof(struct cs1550_sem), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0); // mutex semaphore
     full = mmap(NULL, sizeof(struct cs1550_sem), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);  // full semaphore
     empty = mmap(NULL, sizeof(struct cs1550_sem), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0); // empty semaphore
-    buffer = mmap(NULL, num_of_elements, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0); // shared array to be subject to race condition
+
+    buffer = mmap(NULL, num_of_elements * sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0); // shared array to be subject to race condition
+
+    in = mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
+    out = mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
+
+    pitem = mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
+    *pitem = 0;
 
     // Initialize the semaphores to the correct value
     empty->value = num_of_elements; // Start with N number of empty cells in the array
     mutex->value = 1; // Set the mutex at one in order to establish atomicity of instructions
     full->value = 0; // Start with 0 full cells in the array
 
-    empty->id = 0;
-    mutex->id = 1;
-    full->id = 2;
-
     int i = 0;
     int f = 0;
+
+
 
     // Loop around N number of times, where N is the number of producers you want to create plus the number of consumers.
     for(i = 0; i < (num_of_prod + num_of_cons); i++)
@@ -80,27 +92,34 @@ int main (int argc, char *argv[])
     }
 
     if(f == 0) return 0; // stop execution of the parent because it has already created all producers and consumers.
-    if(i < num_of_prod) produce(); // create producers
-    else consume(); // create consumers
+    if(i < num_of_prod)
+    {
+        produce();
+    } // create producers
+    else
+    {
+        consume();
+    } // create consumers
     return 0;
 }
 
 
 int produce()
 {
-    int in = 0;
-    int pitem = 2;
+
 
     while (1)
     {
         down(empty); // check if there are empty cells in our array to put things in
         down(mutex); // enter critical region
 
-        buffer[in] = pitem;
+        buffer[*in] = *pitem;
 
-        in = (in + 1) % num_of_elements; // circular increment
+        fprintf(stderr, "PRODUCING %d. (E%d, F%d)\n", *pitem, empty->value, full->value);
 
-        printf("                                PRODUCING %d. (E%d, F%d)\n", in, empty->value, full->value);
+        *in = (*in + 1) % num_of_elements; // circular increment
+
+        *pitem = *pitem + 1;
 
         up(mutex); // leave critical region
         up(full);  // we've not got one more full cell in our array now that we've produced one.
@@ -111,7 +130,6 @@ int produce()
 
 int consume()
 {
-    int out = 0;
     int citem = 0;
 
     while (1)
@@ -119,11 +137,12 @@ int consume()
         down(full); // check if there are full cells in the array to take things from
         down(mutex); // enter critical region
 
-        citem = buffer[out];
+        citem = buffer[*out];
 
-        out = (out+1) % num_of_elements; // circular increment
+        fprintf(stderr, "CONSUMING %d. (E%d, F%d)\n", citem, empty->value, full->value);
 
-        printf("                                CONSUMING %d. (E%d, F%d)\n", out, empty->value, full->value);
+        *out = (*out+1) % num_of_elements; // circular increment
+
 
         up(mutex); // leave critical region
         up(empty); // we've got one more empty cell in our array now that we've consumer one.
@@ -134,12 +153,12 @@ int consume()
 // helper functions to make syscalls
 void down(struct cs1550_sem *sem)
 {
-    syscall(__NR_sys_cs1550_down, sem);
+    syscall(326, sem);
     return;
 }
 
 void up(struct cs1550_sem *sem)
 {
-    syscall(__NR_sys_cs1550_up, sem);
+    syscall(327, sem);
     return;
 }
