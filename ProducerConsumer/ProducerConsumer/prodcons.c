@@ -40,12 +40,9 @@ int *pitem;
 
 int main (int argc, char *argv[])
 {
-
-
-
-
+    // Check for correct format.
     if(argc != 4)
-    { // Check for correct format.
+    {
         printf("Valid format is: prodcons 2 2 1000\n");
         return -1;
     }
@@ -59,13 +56,10 @@ int main (int argc, char *argv[])
     mutex = mmap(NULL, sizeof(struct cs1550_sem), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0); // mutex semaphore
     full = mmap(NULL, sizeof(struct cs1550_sem), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);  // full semaphore
     empty = mmap(NULL, sizeof(struct cs1550_sem), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0); // empty semaphore
-
     buffer = mmap(NULL, num_of_elements * sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0); // shared array to be subject to race condition
-
-    in = mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
-    out = mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
-
-    pitem = mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
+    in = mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0); // producer index
+    out = mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0); // consumer index
+    pitem = mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, 0, 0); // increasing value to be produced into buffer
     *pitem = 0;
 
     // Initialize the semaphores to the correct value
@@ -75,8 +69,6 @@ int main (int argc, char *argv[])
 
     int i = 0;
     int f = 0;
-
-
 
     // Loop around N number of times, where N is the number of producers you want to create plus the number of consumers.
     for(i = 0; i < (num_of_prod + num_of_cons); i++)
@@ -92,14 +84,9 @@ int main (int argc, char *argv[])
     }
 
     if(f == 0) return 0; // stop execution of the parent because it has already created all producers and consumers.
-    if(i < num_of_prod)
-    {
-        produce();
-    } // create producers
-    else
-    {
-        consume();
-    } // create consumers
+    if(i < num_of_prod) produce(); // create producers
+    else consume(); // create consumers
+
     return 0;
 }
 

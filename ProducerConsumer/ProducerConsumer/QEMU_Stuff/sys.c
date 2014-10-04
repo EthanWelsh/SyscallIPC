@@ -2647,7 +2647,7 @@ int orderly_poweroff(bool force)
  * * * * * * * * * * * * * */
 
 
-
+// Used to store a list of sleeping processes waiting on a semaphore.
 typedef struct Node Node;
 struct Node
 {
@@ -2655,6 +2655,7 @@ struct Node
     Node *next;
 };
 
+// actual semaphore struct which contains a value and the head & tail pointers of its queue
 typedef struct cs1550_sem semaphore;
 
 struct cs1550_sem
@@ -2668,9 +2669,9 @@ int enqueue(semaphore *);
 struct task_struct * dequeue(semaphore *);
 
 
+// enqueue processes onto the queue which are waiting on the semaphore. They'll be dequeued and awoken later...
 int enqueue(semaphore *s)
-{ //and push on things that you put to sleep
-
+{
     Node *toAdd = kmalloc(sizeof(Node), GFP_KERNEL);
 
     if (s->head == NULL || s-> tail == NULL) // If the head is null, add a new head.
@@ -2691,11 +2692,9 @@ int enqueue(semaphore *s)
     return 0;
 }
 
-
+// take a sleeping process out of the queue and return it
 struct task_struct *dequeue(semaphore *s)
-{ // you pop off things you wake up
-
-
+{
         struct task_struct *tsk = s->head->task;
         if(s->head->next == NULL)
         {
@@ -2713,10 +2712,10 @@ struct task_struct *dequeue(semaphore *s)
         }
 }
 
-
+// Splinlock variable to preserve atomicity during calls to up and down.
 DEFINE_SPINLOCK(my_lock);
 
-
+// Attempt to acquire the resource. If the value is too low, put yourself onto the queue and go to sleep.
 asmlinkage long sys_cs1550_down(struct cs1550_sem *sem)
 {
     spin_lock(&my_lock);
@@ -2730,15 +2729,12 @@ asmlinkage long sys_cs1550_down(struct cs1550_sem *sem)
         spin_unlock(&my_lock);
         schedule();
     }
-
-
     spin_unlock(&my_lock);
-
-
     return 0;
 }
 
 
+// Relinquish your resource and wake up someone who was waiting for it.
 asmlinkage long sys_cs1550_up(struct cs1550_sem *sem)
 {
 
